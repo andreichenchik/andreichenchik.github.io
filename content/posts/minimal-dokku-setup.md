@@ -7,6 +7,8 @@ summary: 'My minimal stack for mobile side projects: a low-cost Hetzner VPS, Doc
 tags: ["infra", "pet-projects"]
 ShowToc: true
 TocOpen: false
+cover:
+  image: images/dokku.jpg
 ---
 
 ## Why This Is Hard

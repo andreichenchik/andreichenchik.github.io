@@ -7,6 +7,8 @@ summary: 'Минимальный сетап для мобильных сайд-�
 tags: ["infra", "pet-projects"]
 ShowToc: true
 TocOpen: false
+cover:
+  image: images/dokku.jpg
 ---
 
 ## В чем сложность
