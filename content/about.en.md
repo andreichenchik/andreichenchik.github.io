@@ -27,10 +27,7 @@ Fun facts
 - Run 2021km in 2021, [follow me on Strava](https://www.strava.com/athletes/44250763)!
 - Love to travel and do [long bike rides](https://www.strava.com/activities/4836441053)
 - Born in imaginary land: [Transnistria](https://en.wikipedia.org/wiki/Transnistria)
-- My PGP fingerprint is [16F2 94C8 5A67 F0D5 1E54 8ACB A688 B7C1 16CA 5B13](https://github.com/AndreiChenchik/AndreiChenchik/blob/main/andrei.asc) 
-
 
 Sometimes I write [blog](https://chenchik.me) and [tweet](https://twitter.com/AndreiChenchik) thoughts. Feel free to reach me on [LinkedIn](https://www.linkedin.com/in/AndreiChenchik) to talk about jobs. 
-
 
 Looking for my **CV**? [Get **PDF**](https://github.com/AndreiChenchik/AndreiChenchik/raw/main/cv/AndreiChenchik-CV.pdf) or [**view** on GitHub](https://github.com/AndreiChenchik/AndreiChenchik/blob/main/cv/AndreiChenchik-CV.md)!

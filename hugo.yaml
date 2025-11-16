@@ -25,7 +25,28 @@ minify:
 
 languages:
   en:
-    languageName: "English"
+    languageName: "🇬🇧"
+    weight: 2
+    taxonomies:
+      category: categories
+      tag: tags
+      series: series
+    menu:
+      main:
+        - name: About
+          url: about/
+          weight: 5
+        - name: Archive
+          url: archives
+          weight: 5
+        - name: Search
+          url: search/
+          weight: 10
+        - name: Tags
+          url: tags/
+          weight: 10
+  ru:
+    languageName: "🇷🇺"
     weight: 1
     taxonomies:
       category: categories
@@ -34,7 +55,7 @@ languages:
     menu:
       main:
         - name: About
-          url: about
+          url: about/
           weight: 5
         - name: Archive
           url: archives
