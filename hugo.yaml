@@ -7,7 +7,8 @@ module:
 # If your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would
 # contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
 copyright: "© [Andrei Chenchik](https://github.com/andreichenchik)"
-paginate: 5
+pagination:
+  pagerSize: 5
 
 enableInlineShortcodes: true
 enableRobotsTXT: true
@@ -98,12 +99,12 @@ params:
     - name: LinkedIn
       title: Write me on LinkedIn
       url: "https://www.linkedin.com/in/andreichenchik/"
-    - name: Mastodon
-      title: Follow me on Mastodon
-      url: "https://hachyderm.io/@AndreiChenchik"
-    - name: X
-      title: Follow me on X/Twitter
-      url: "https://x.com/andreichenchik"
+    # - name: Mastodon
+    #   title: Follow me on Mastodon
+    #   url: "https://hachyderm.io/@AndreiChenchik"
+    # - name: X
+    #   title: Follow me on X/Twitter
+    #   url: "https://x.com/andreichenchik"
     - name: RSS
       title: Subscribe to this blog
       url: "/index.xml"
@@ -178,5 +179,5 @@ markup:
 services:
   instagram:
     disableInlineCSS: true
-  twitter:
+  x:
     disableInlineCSS: true
