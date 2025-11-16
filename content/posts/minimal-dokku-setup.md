@@ -4,7 +4,7 @@ date: 2025-07-15T10:00:00+02:00
 draft: false
 description: 'How I assemble a cheap backend for side projects using a VPS, Dokku, and Docker containers.'
 summary: 'My minimal stack for mobile side projects: a low-cost Hetzner VPS, Docker containers, and Dokku without infrastructure headaches.'
-tags: ["infra", "pet-projects"]
+tags: ["infra", "pet-projects", "dokku", "hetzner"]
 ShowToc: true
 TocOpen: false
 cover:
