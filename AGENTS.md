@@ -66,6 +66,7 @@ npm install          # only if you add JS/CSS tooling that requires Node
 - Highlight actionable takeaways with bullet lists or numbered steps to match the style in `content/posts/why-cognitive-bias.md`.
 - Always fill `tags` with 1–4 lowercase keywords; introduce new tags only when an existing one is insufficient.
 - Include `description` for SEO and `summary` for PaperMod cards; they can differ slightly so cards remain punchy.
+- Quote `description`/`summary` front matter strings that contain punctuation like colons so Hugo/YAML parsing never breaks.
 - Show/hide the table of contents using `ShowToc`/`TocOpen` depending on article length (enable for pieces longer than ~400 words).
 
 ## Adding media
