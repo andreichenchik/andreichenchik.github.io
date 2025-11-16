@@ -3,7 +3,7 @@ title: Why aren't we 100% rational?
 date: 2022-07-14T10:00:00+02:00 
 draft: false
 description: We aren’t fully rational because our brains rely on fast heuristics and cognitive biases. Learn how slow, deliberate thinking helps you avoid costly mistakes.
-summary: In this post I’m trying to understand why our brain’s shortcuts and intuition so often override logic—and how noticing these patterns can help you make calmer, better decisions about money, work, and relationships.
+summary: In this post I’m trying to understand why our brain’s shortcuts and intuition often override logic—and how noticing these patterns can help you make better decisions in everyday life.
 tags: ["psychology", "productivity"]
 ShowToc: true
 TocOpen: true
