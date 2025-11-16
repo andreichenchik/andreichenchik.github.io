@@ -7,6 +7,8 @@ summary: How I make the thin Russian pancakes that turned into a weekend traditi
 tags: ["cooking"]
 ShowToc: true
 TocOpen: true
+cover:
+  image: images/blini.jpg
 ---
 
 About two years ago I found a dead simple recipe for Russian pancakes (blini). They’re thin, stretchy, and perfect for wrapping jam. I never thought I’d write about cooking here, but I make these on a lot of slow weekends, so it’s nice to keep the details somewhere I can find them.
