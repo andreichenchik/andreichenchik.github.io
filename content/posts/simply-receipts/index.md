@@ -4,7 +4,7 @@ date: 2021-09-25T14:12:00+02:00
 draft: false
 tags: ["apps"]
 cover:
-  image: images/smartreceipts.png
+  image: cover.png
 ShowToc: true
 TocOpen: true
 ---
