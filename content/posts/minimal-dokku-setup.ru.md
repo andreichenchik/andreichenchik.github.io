@@ -150,3 +150,7 @@ cover:
    ```
 
 Готово! Теперь приложение доступно по адресу https://helloworld.pet.chenchik.me
+
+## Источники
+- https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/
+- https://dokku.com/docs/getting-started/installation/

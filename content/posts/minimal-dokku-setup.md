@@ -150,3 +150,7 @@ Time to deploy something. The first two commands run on the server; everything e
    ```
 
 Done! The app now lives at https://helloworld.pet.chenchik.me
+
+## Sources
+- https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/
+- https://dokku.com/docs/getting-started/installation/
