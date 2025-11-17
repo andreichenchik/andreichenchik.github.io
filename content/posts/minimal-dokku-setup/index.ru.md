@@ -8,7 +8,7 @@ tags: ["infra", "pet-projects", "dokku", "hetzner"]
 ShowToc: true
 TocOpen: false
 cover:
-  image: images/dokku.jpg
+  image: cover.jpg
 ---
 
 ## В чем сложность
