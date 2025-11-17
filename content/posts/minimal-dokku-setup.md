@@ -54,9 +54,9 @@ Expect to pay around €3.5–4.5/month for this configuration.
 I buy the cheapest domain I can find—zones like `.xyz` usually cost €1–2/year—and configure DNS right at the registrar. If they don’t provide DNS, I hook up free [Cloudflare DNS](https://www.cloudflare.com/application-services/products/dns/).
 
 1. Open the domain management panel.
-1. Create a wildcard record `*.pet.chenchik.me` (A/AAAA) pointing to the server’s IP.
+1. Create a wildcard record `*.chenchik.me` (A/AAAA) pointing to the server’s IP.
 
-Now every subdomain such as `helloworld.pet.chenchik.me` resolves to my VPS.
+Now every subdomain such as `helloworld.chenchik.me` resolves to my VPS.
 
 ### Installing Dokku
 The rest of the commands happen on the server: `ssh root@<ip> -i ~/.ssh/hetzner`.
@@ -88,7 +88,7 @@ The rest of the commands happen on the server: `ssh root@<ip> -i ~/.ssh/hetzner`
    ```
 1. Set the default domain:
    ```shell
-   dokku domains:set-global pet.chenchik.me
+   dokku domains:set-global <your-domain>
    ```
 1. Install the Let’s Encrypt plugin, wire up your email, and enable automatic renewals:
    ```shell
@@ -149,7 +149,7 @@ Time to deploy something. The first two commands run on the server; everything e
    git push --set-upstream dokku main
    ```
 
-Done! The app now lives at https://helloworld.pet.chenchik.me
+Done! The app now lives at https://helloworld.chenchik.me
 
 ## Sources
 - https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/

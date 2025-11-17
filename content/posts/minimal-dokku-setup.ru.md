@@ -54,9 +54,9 @@ cover:
 Беру самый бюджетный домен — в зонах вроде `.xyz` они стоят 1–2 € в год — и настраиваю DNS прямо у регистратора. Если панели нет, подключаю бесплатный [Cloudflare DNS](https://www.cloudflare.com/application-services/products/dns/).
 
 1. Открываю управление доменом.
-1. Создаю wildcard-запись `*.pet.chenchik.me` (A/AAAA) и указываю IP своего сервера.
+1. Создаю wildcard-запись `*.chenchik.me` (A/AAAA) и указываю IP своего сервера.
 
-Теперь любой поддомен вроде `helloworld.pet.chenchik.me` резолвится в мой VPS.
+Теперь любой поддомен вроде `helloworld.chenchik.me` резолвится в мой VPS.
 
 ### Установка Dokku
 Дальше все команды выполняю уже на сервере: `ssh root@<ip> -i ~/.ssh/hetzner`.
@@ -88,7 +88,7 @@ cover:
    ```
 1. Привязываю домен по умолчанию:
    ```shell
-   dokku domains:set-global pet.chenchik.me
+   dokku domains:set-global <your-domain>
    ```
 1. Ставлю плагин для HTTPS и настраиваю автоматическое продление сертификатов, для создания сертификатов нужно будет указать email:
    ```shell
@@ -149,7 +149,7 @@ cover:
    git push --set-upstream dokku main
    ```
 
-Готово! Теперь приложение доступно по адресу https://helloworld.pet.chenchik.me
+Готово! Теперь приложение доступно по адресу https://helloworld.chenchik.me
 
 ## Источники
 - https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/
