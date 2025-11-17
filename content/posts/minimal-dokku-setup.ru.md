@@ -126,21 +126,21 @@ cover:
    После создания файла не забудьте `chmod 600 ~/.ssh/config`, чтобы поправить права доступа.
 1. Создаю минимальное бэкенд-приложение (копирую несколько строчек в файл):
    ```shell
-   cat <<'EOF' > server.py
-   import http.server
-   class H(http.server.BaseHTTPRequestHandler):
-       def do_GET(self): self.wfile.write(b'{"message":"hello world"}')
-   http.server.HTTPServer(("", 80), H).serve_forever()
+   cat <<'EOF' > server.js
+   const http = require('http');
+   http.createServer((_, res) => {
+      res.writeHead(200, {'Content-Type':'application/json'});
+      res.end('{"message":"hello world"}');
+   }).listen(80);
    EOF
    ```
 1. Создаю минимальный `Dockerfile`:
    ```shell
    cat <<'EOF' > Dockerfile
-   FROM python:3.14-alpine
-   WORKDIR /app
-   COPY server.py /app
+   FROM node:24-alpine
+   COPY server.js .
    EXPOSE 80
-   CMD ["python", "server.py"]
+   CMD ["node", "server.js"]
    EOF
    ```
 1. Коммичу изменения и деплою. Как только `git push` доезжает до сервера, Dokku собирает образ и перезапускает приложение:

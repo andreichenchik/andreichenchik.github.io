@@ -126,21 +126,21 @@ Time to deploy something. The first two commands run on the server; everything e
    After creating the file, run `chmod 600 ~/.ssh/config` to fix permissions.
 1. Create a minimal backend:
    ```shell
-   cat <<'EOF' > server.py
-   import http.server
-   class H(http.server.BaseHTTPRequestHandler):
-       def do_GET(self): self.wfile.write(b'{"message":"hello world"}')
-   http.server.HTTPServer(("", 80), H).serve_forever()
+   cat <<'EOF' > server.js
+   const http = require('http');
+   http.createServer((_, res) => {
+      res.writeHead(200, {'Content-Type':'application/json'});
+      res.end('{"message":"hello world"}');
+   }).listen(80);
    EOF
    ```
 1. Add a tiny `Dockerfile`:
    ```shell
    cat <<'EOF' > Dockerfile
-   FROM python:3.14-alpine
-   WORKDIR /app
-   COPY server.py /app
+   FROM node:24-alpine
+   COPY server.js .
    EXPOSE 80
-   CMD ["python", "server.py"]
+   CMD ["node", "server.js"]
    EOF
    ```
 1. Commit and deploy. As soon as `git push` reaches the server, Dokku builds the image and restarts the app:
