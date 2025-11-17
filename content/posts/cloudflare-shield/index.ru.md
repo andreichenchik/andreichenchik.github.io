@@ -1,7 +1,7 @@
 ---
 title: Cloudflare-прокси для моего Dokku сервера
 date: 2025-08-17T10:00:00+02:00
-draft: true
+draft: false
 description: 'Как я прикрутил бесплатный прокси Cloudflare к своему минимальному Dokku-серверу, получил HTTPS и защитил его фаерволом.'
 summary: 'Рассказываю, как ускорить бэкенд на Dokku используя Cloudflare: перенести домен, выдать origin-сертификат, включить прокси и закрыть сервер фаерволом.'
 tags: ["infra", "cloudflare", "dokku", "hetzner"]
