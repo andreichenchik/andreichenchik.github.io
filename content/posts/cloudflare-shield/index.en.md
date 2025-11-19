@@ -1,9 +1,9 @@
 ---
-title: Cloudflare-прокси для моего Dokku сервера
+title: Cloudflare proxy for my Dokku server
 date: 2025-08-17T10:00:00+02:00
 draft: false
-description: 'Как я прикрутил бесплатный прокси Cloudflare к своему минимальному Dokku-серверу, получил HTTPS и защитил его фаерволом.'
-summary: 'Рассказываю, как ускорить бэкенд на Dokku используя Cloudflare: перенести домен, выдать origin-сертификат, включить прокси и закрыть сервер фаерволом.'
+description: 'How I put free Cloudflare proxy in front of my tiny Dokku box, got HTTPS, and locked the server down with a firewall.'
+summary: 'Hide a Dokku app behind Cloudflare: move the domain, turn on the proxy, issue an origin certificate, and block direct traffic with a firewall.'
 tags: ["infra", "cloudflare", "dokku", "hetzner"]
 ShowToc: true
 TocOpen: false
@@ -11,65 +11,71 @@ cover:
   image: cover.png
 ---
 
-Продолжаем историю с [минимальным Dokku-сервером](/ru/posts/minimal-dokku-setup/): Приложение `helloworld` уже доступно, сервер работает исправно, но можно немного ускорить его работу. Чтобы не упираться в железо, я добавляю **Cloudflare** между пользователем и сервером. Это бесплатно, даёт кэш, автоматичскую проверку сертификатов и фильтрует большую часть мусорных спам запросов до того, как запросы попадут ко мне на сервер.
+This is a follow-up to the [minimal Dokku server](/posts/minimal-dokku-setup/) story. I pulled this part out so the original guide stays focused, and we can keep iterating on the same Hello World backend.
 
-### Что потребуется
+The `helloworld` app already [runs in production](https://helloworld.chenchik.me); the server is alive and well. Now I want extra headroom for performance and security, so I’m placing **Cloudflare** between users and the VPS. It’s free, adds caching and HTTP/2, and filters most junk traffic before it ever touches Dokku.
 
-- зарегистрированный домен, который можно перенести к [Cloudflare](https://cloudflare.com) (я купил его заранее для прошлой статьи);
-- зарегистрироваться в Cloudflare;
-- сервер с установленным Dokku и приложением `helloworld`;
-- доступ к Hetzner Firewall (или к фаерволу вашего серверного провайдера), чтобы закрыть сервер от любого трафика, кроме cloudflare.
+## Prerequisites
 
+- a registered domain you can transfer into [Cloudflare](https://cloudflare.com);
+- a Cloudflare account;
+- a server with Dokku and the `helloworld` app;
+- access to Hetzner Firewall (or your provider’s firewall) so only Cloudflare IPs can reach the box.
 
-## Пошаговая инструкция 
-### Переносим домен в Cloudflare
+## Step-by-step
 
-Задача — сделать Cloudflare авторитетной зоной для моего домена. В панели я создаю новую зону, указываю домен и следую мастеру переноса. У каждого регистратора свои шаги, поэтому удобнее смотреть официальные инструкции — Cloudflare собрал их [в отдельном гайде](https://developers.cloudflare.com/registrar/get-started/transfer-domain-to-cloudflare/). После смены NS-записей жду пару часов: как только Cloudflare подтвердит зону, можно двигаться дальше.
+### 1. Move the domain to Cloudflare
 
-### Включаем прокси для DNS-записей
+First, give Cloudflare control over DNS. It’s one of the fastest and most reliable DNS platforms, and the base plan is free, so the transfer itself is already an upgrade. In the dashboard I create a new zone and follow the wizard. Every registrar has its own flow, so Cloudflare keeps the official instructions here: https://developers.cloudflare.com/registrar/get-started/transfer-domain-to-cloudflare/ Once the NS records are updated, wait until Cloudflare verifies the zone.
 
-В зоне уже лежат A-записи на мой Hetzner IP и поддомен `helloworld`. По умолчанию DNS работает «серой» и лишь отвечает на запросы. Мне нужен именно прокси, поэтому я включаю оранжевое облако (Proxied) у записи `helloworld`. Теперь весь HTTP/HTTPS-трафик идёт через Cloudflare: кеш, gzip, HTTP/2 и бесплатные Edge-сертификаты активируются автоматически. На этом этапе приложение уже доступно по `https://helloworld.chenchik.me`, но сертификат принадлежит Cloudflare, а между Cloudflare и сервером пока ездит обычный HTTP.
+### 2. Turn on the proxy
 
-### Генерируем Origin Certificate
+The zone already contains A-records pointing to my Hetzner IP. By default Cloudflare only answers DNS queries (grey cloud). I need the full proxy, so I switch the `helloworld` record to the orange cloud (Proxied). Now all HTTP/HTTPS traffic flows through Cloudflare and the free edge certificates kick in automatically. At this point the app is already available at `https://helloworld.chenchik.me`.
 
-Чтобы исключить MitM между Cloudflare и моим Dokku, я выпускаю **Origin Certificate**. Это бесплатный сертификат, который доверяет только Cloudflare. В панели захожу в **SSL/TLS → Origin Server** и генерирую пару на 15 лет. Cloudflare выдаёт мне приватный ключ и сертификат — я сохраняю их как `cloudflare-origin.key` и `cloudflare-origin.pem`. Этим же этапам посвящён отличный разбор от Bitkidd: https://bitkidd.dev/posts/use-cloudflare-ssl-certificates-with-dokku
+### 3. Issue an Origin Certificate
 
-Почему именно origin-сертификат? С обычным Let's Encrypt я упрямся в rate limit, да и нет смысла тратить публичный сертификат на трафик, который остаётся внутри Cloudflare. Эту идею хорошо описывает защита Dokku за Cloudflare у Spiffy: https://spiffy.tech/dokku-with-lets-encrypt-behind-cloudflare
+This setup works, but managing Let’s Encrypt certificates becomes painful, especially with several apps—Brian explains the issue well: https://bitkidd.dev/posts/use-cloudflare-ssl-certificates-with-dokku To avoid rate limits and keep public certificates away from the private network, I issue an **Origin Certificate** instead. It secures the connection between Cloudflare and the server for up to 15 years. In the dashboard I go to **SSL/TLS → Origin Server**, click “Create Certificate,” and save the private key and certificate as `pet.key` and `pet.crt`.
 
-### Ставим сертификат в Dokku
+### 4. Install the certificate in Dokku
 
-Дальше нужно доставить файлы на сервер и включить их в Dokku:
+Move the files to the server and plug them into Dokku.
+
+1. SSH into the box: `ssh root@<ip>`.
+2. Create files with the certificate and key (`nano pet.crt`, `nano pet.key`) and paste the Cloudflare data.
+3. Package them, disable the old certificate, and add the new one:
+
+   ```shell
+   tar -cvf pet.tar pet.crt pet.key
+   dokku letsencrypt:disable helloworld
+   dokku certs:add helloworld < pet.tar
+   dokku ps:rebuild helloworld
+   ```
+
+`certs:add` replaces the certificate, and `ps:rebuild` restarts the app with the updated TLS settings. Cloudflare terminates TLS at the edge and keeps TLS all the way to the server, so the whole chain is encrypted.
+
+Once everything works, I remove the Let’s Encrypt plugin to keep Dokku clean:
 
 ```shell
-scp cloudflare-origin.* root@<ip>:/root/
-ssh root@<ip>
-
-dokku certs:remove helloworld || true
-dokku certs:add helloworld /root/cloudflare-origin.pem /root/cloudflare-origin.key
-dokku ps:rebuild helloworld
+sudo dokku plugin:uninstall letsencrypt
 ```
 
-Команда `certs:add` перезапишет сертификат, а `ps:rebuild` пересоздаст контейнер с новыми TLS-настройками. После этого Cloudflare устанавливает TLS до своего Edge, а Edge общается с сервером также по TLS — цепочка полностью зашифрована. Проверяю, что сертификат подтянулся, командой:
+### 5. Lock the server with a firewall
+
+Anyone can still bypass Cloudflare and hit the server directly. To prevent that, I enable **Firewall** in Hetzner Cloud and allow inbound 80/443 traffic only from Cloudflare IP ranges: https://www.cloudflare.com/ips/ SSH stays limited to my own addresses. Now the server “sees” the internet exclusively through Cloudflare. Catalin walks through the same setup for Hetzner + Cloudflare: https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/
+
+## Final checks
+
+Confirm that the certificate is in use:
 
 ```shell
 curl -I https://helloworld.chenchik.me
 ```
 
-`server: cloudflare` и `cf-cache-status: DYNAMIC` подскажут, что трафик идёт через прокси.
+`server: cloudflare` and `cf-cache-status: DYNAMIC` tell me the proxy is in front. Direct requests to the IP already fail on ports 80/443 because the firewall blocks them.
 
-### Закрываем сервер фаерволом
+The whole rollout takes about 30–60 minutes. In return you get more performance from caching, free HTTPS, and a shield from random spikes. Next up: adding more features to these little pet projects.
 
-Пока любой может обойти Cloudflare и стучаться прямо в мой IP. Чтобы это остановить, в Hetzner Cloud включаю **Firewall** и разрешаю входящие соединения на 80/443 только с IP-пулов Cloudflare (их список лежит в панели и регулярно дополняется). Входящий SSH оставляю только со своего домашнего IP. Так сервер «видит» интернет исключительно через Cloudflare, а значит, на нём не нужно гонять Fail2ban и ловить лишние сканы. У Catalin есть наглядный разбор с Hetzner и Cloudflare, я опирался именно на него: https://catalins.tech/selfhost-with-dokku-hetzner-cloudflare/
-
-### Финальные проверки
-
-- `curl -I https://helloworld.chenchik.me` возвращает 200 и заголовки Cloudflare.
-- При прямом обращении к IP порты 80/443 закрыты (firewall).
-- В Cloudflare → Security → Events видно реальные запросы, а на сервер прилетает только проксированный трафик.
-
-На всё уходит минут 20–30, а в ответ получаешь больше производительности за счёт кэша, бесплатные HTTPS-сертификаты и защиту от случайных нагрузок. Следующий шаг — подключить наблюдаемость и следить, как ведёт себя мой мини-бэкенд под Cloudflare.
-
-## Источники
+## Sources
 
 - https://bitkidd.dev/posts/use-cloudflare-ssl-certificates-with-dokku
 - https://spiffy.tech/dokku-with-lets-encrypt-behind-cloudflare
