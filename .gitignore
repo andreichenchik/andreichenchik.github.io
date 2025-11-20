@@ -15,3 +15,4 @@ hugo.linux
 #macOS
 .DS_STORE
 /resources/_cache
+.notes
