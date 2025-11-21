@@ -117,7 +117,7 @@ git commit -m "fruits api"
 git push --set-upstream dokku main
 ```
 
-Проверяем: https://fruits.chenchik.me, работает!
+Проверяем: https://fruits.chenchik.me/?filter=app, работает!
 
 ## Настраиваем бэкап в Cloudflare R2
 

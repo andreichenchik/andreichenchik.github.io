@@ -118,7 +118,7 @@ git commit -m "fruits api"
 git push --set-upstream dokku main
 ```
 
-Check: https://fruits.chenchik.me — works!
+Check: https://fruits.chenchik.me/?filter=app — it works!
 
 ## Set up backups to Cloudflare R2
 
