@@ -11,6 +11,11 @@ cover:
   image: cover.jpg
 ---
 
+This post is part of a tiny backend platform series:
+- [Minimal Dokku Setup for Side Projects](/posts/minimal-dokku-setup/)
+- [Cloudflare proxy for my Dokku server](/posts/cloudflare-shield/)
+- [Adding a persistence layer for side projects](/posts/persistent-layer-pet-projects/)
+
 ## Why This Is Hard
 
 Every now and then I get back to tinkering with side projects. As a mobile developer I just need the tiniest backend: return some JSON, write a couple of rows to a database, run a simple bit of logic. Nothing heroic. But the moment I open the first Google result and try to follow the “standard” approach, the supposed basic backend turns into a quest.
