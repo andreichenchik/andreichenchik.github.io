@@ -4,12 +4,14 @@ date: 2025-08-29T10:00:00+02:00
 draft: false
 description: 'Как я поставил один общий PostgreSQL на Hetzner, привязал к нему докку-приложения и настроил ежедневные дампы в Cloudflare R2.'
 summary: 'Один PostgreSQL на Dokku плюс бэкап в Cloudflare R2 — мой базовый persistent-слой для мобильных приложений.'
-tags: ["infra", "pet-projects", "postgres"]
+tags: ["infra", "postgres", "cloudflare", "dokku"]
 ShowToc: true
 TocOpen: false
 cover:
   image: cover.jpg
 ---
+
+Продолжаю историю, начатую с [минимальным Dokku-сервером](/ru/posts/minimal-dokku-setup/), создаю себе платформу для мини приложений. 
 
 ## Зачем вообще база
 
@@ -46,7 +48,7 @@ dokku apps:create fruits
 dokku certs:add testapp < chenchik.tar
 dokku postgres:link db fruits
 ```
-Напоминаю: строчка с сертификатами из [предыдущей статьи](/ru/posts/cloudflare-shield/), она добавляет поддержку HTTPS.
+Напоминаю: строчка с сертификатами из [предыдущей статьи](/ru/posts/cloudflare-shield/), она добавляет поддержку HTTPS, как альтернатива можно использовать `letsencrypt` как в оригинальной статье.
 
 При связывании базы с приложением dokku добавит переменную окружения `DATABASE_URL`, которая позволяет подключиться к серверу. Дальше локально собираю минимальный пример API на Bun, просто потому что в нем есть поддержка `postgres`. Пример нарочито компактный.
 

@@ -2,14 +2,16 @@
 title: "Adding a persistence layer for side projects"
 date: 2025-08-29T10:00:00+02:00
 draft: false
-description: 'How I stick to one shared PostgreSQL on Hetzner, hook up all Dokku apps, and ship daily dumps to Cloudflare R2.'
-summary: 'A single PostgreSQL on Dokku with Cloudflare R2 backups — my baseline persistence for mobile side projects.'
-tags: ["infra", "pet-projects", "postgres"]
+description: 'How I run one shared PostgreSQL on Hetzner, hook up all Dokku apps, and send daily dumps to Cloudflare R2.'
+summary: 'One PostgreSQL on Dokku plus Cloudflare R2 backups — my baseline persistence for mobile apps.'
+tags: ["infra", "postgres", "cloudflare", "dokku"]
 ShowToc: true
 TocOpen: false
 cover:
   image: cover.jpg
 ---
+
+This continues the [minimal Dokku server](/posts/minimal-dokku-setup/) story — I’m building myself a tiny app platform.
 
 ## Why bother with a database
 
@@ -47,7 +49,7 @@ dokku certs:add testapp < chenchik.tar
 dokku postgres:link db fruits
 ```
 
-Reminder: the certificate line is from the [previous post](/posts/cloudflare-shield/); it enables HTTPS.
+Reminder: the certificate line is from the [previous post](/posts/cloudflare-shield/); it enables HTTPS. Alternatively, you can use `letsencrypt` like in the original guide.
 
 When you link the DB to an app, Dokku adds `DATABASE_URL`, which lets the app connect. Locally I assemble a minimal Bun API, mainly because Bun ships with `postgres` support. The example is intentionally compact.
 

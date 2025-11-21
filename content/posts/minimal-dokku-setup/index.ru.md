@@ -4,7 +4,7 @@ date: 2025-07-15T10:00:00+02:00
 draft: false
 description: 'Как я собираю дешёвый бэкенд для сайд-проектов на VPS с Dokku и Docker-контейнерами.'
 summary: 'Минимальный сетап для мобильных сайд-проектов: дешёвый VPS на Hetzner, Docker-контейнеры и Dokku без боли с инфраструктурой.'
-tags: ["infra", "pet-projects", "dokku", "hetzner"]
+tags: ["infra", "dokku", "hetzner"]
 ShowToc: true
 TocOpen: false
 cover:
