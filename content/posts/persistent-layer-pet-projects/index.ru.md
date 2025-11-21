@@ -1,25 +1,27 @@
 ---
 title: "Добавляю persistent-слой для пет-проектов"
-date: 2025-07-20T10:00:00+02:00
+date: 2025-08-29T10:00:00+02:00
 draft: false
-description: 'Почему решил держать один PostgreSQL на Hetzner и как подключаю его к докку-приложениям с бэкапом в Cloudflare R2.'
-summary: 'Один PostgreSQL на докку-сервере и бэкап в Cloudflare R2 — мой базовый persistent-слой для мобилок.'
+description: 'Как я поставил один общий PostgreSQL на Hetzner, привязал к нему докку-приложения и настроил ежедневные дампы в Cloudflare R2.'
+summary: 'Один PostgreSQL на Dokku плюс бэкап в Cloudflare R2 — мой базовый persistent-слой для мобильных приложений.'
 tags: ["infra", "pet-projects", "postgres"]
 ShowToc: true
 TocOpen: false
+cover:
+  image: cover.jpg
 ---
 
 ## Зачем вообще база
 
-Большинство мобильных фич упираются в хранение: нужно держать список пользователями созданных сущностей, синхронизировать состояние между устройствами, валидировать платежи. Даже «минимальный» бэкенд должен уметь надежно сохранить данные, иначе весь смысл постоянного сервера теряется. Поэтому перед очередным пет-проектом я сначала решил навести порядок с persistent-слоем, а уже потом деплоить новые контейнеры.
+Обычно для мобильных проектов backend нужен для обработки данных вне клиента, поэтому даже «минимальный» бэкенд должен уметь сохранять данные, иначе весь смысл постоянного сервера теряется. Перед очередным пет-проектом надо настроить persistent-слой, а уже потом деплоить новые приложения.
 
 ## Что выбрал
 
-Из вариантов были SQLite (в каждом сервисе свой файл), несколько PostgreSQL-инстансов или один общий. Остановился на простом и управляемом варианте:
+Из вариантов были SQLite (в каждом сервисе свой файл), несколько PostgreSQL-инстансов или один общий. Я сам фанат SQLite, но с ним будут сложности менеджмента файлов, а я стремлюсь к минимум конфигурации. Поэтому остановился на простом и управляемом варианте:
 
 - **Один PostgreSQL на сервере**: меньше всего обслуживания; если он падает, все сервисы падают, но на одном VPS это ок.
-- **Одна база для всех проектов**: экономлю память и слоты соединений; разграничиваю всё таблицами (или схемами по желанию).
-- **Бэкапы**: логический `pg_dump` через докку-плагин в объектное хранилище.
+- **Одна база для всех проектов**: экономлю память и CPU-ресурсы; разграничиваю всё таблицами.
+- **Бэкапы**: через докку-плагин на внешний сервер из коробки.
 
 ## Создаем базу данных
 
@@ -29,26 +31,26 @@ TocOpen: false
 sudo dokku plugin:install https://github.com/dokku/dokku-postgres.git
 ```
 
-Дальше завожу одну общую базу (имя сервиса — `petdb`) и использую в ней отдельные таблицы/схемы под проекты:
+Дальше завожу одну общую базу (имя сервиса — `db`) и использую в ней отдельные таблицы/схемы под проекты:
 
 ```shell
-dokku postgres:create petdb
-dokku ps:restart petdb
-dokku postgres:info petdb
+dokku postgres:create db
 ```
 
-`info` нужен, чтобы убедиться, что сервис жив и слушает стандартный порт.
-
-## Пример приложения на Bun (создаем и деплоим)
+## Пример приложения на Bun
 
 На сервере:
 
 ```shell
 dokku apps:create fruits
-dokku postgres:link petdb fruits
+dokku certs:add testapp < chenchik.tar
+dokku postgres:link db fruits
 ```
+Напоминаю: строчка с сертификатами из [предыдущей статьи](/ru/posts/cloudflare-shield/), она добавляет поддержку HTTPS.
 
-Линк ставлю сразу при создании, чтобы `DATABASE_URL` уже был в конфиге к моменту первого деплоя. Дальше локально собираю минимальный API на Bun.
+При связывании базы с приложением dokku добавит переменную окружения `DATABASE_URL`, которая позволяет подключиться к серверу. Дальше локально собираю минимальный пример API на Bun, просто потому что в нем есть поддержка `postgres`. Пример нарочито компактный.
+
+Создаем папку с двумя файлами.
 
 `server.ts`:
 
@@ -57,23 +59,19 @@ import { serve } from "bun";
 import postgres from "postgres";
 
 const sql = postgres(process.env.DATABASE_URL!);
+
 let seeded = false;
 
 async function ensureSeededOnce() {
   if (seeded) return;
 
-  await sql`CREATE TABLE IF NOT EXISTS items (name TEXT NOT NULL)`;
+  await sql`CREATE TABLE IF NOT EXISTS items (name TEXT PRIMARY KEY)`;
 
-  const [{ count }] = await sql<{ count: string }[]>`
-    SELECT COUNT(*)::text as count FROM items
+  await sql`
+    INSERT INTO items (name)
+    VALUES ('apple'), ('another-apple'), ('banana'), ('carrot')
+    ON CONFLICT DO NOTHING
   `;
-
-  if (Number(count) === 0) {
-    await sql`
-      INSERT INTO items (name)
-      VALUES ('apple'), ('banana'), ('carrot')
-    `;
-  }
 
   seeded = true;
 }
@@ -87,7 +85,8 @@ serve({
     await ensureSeededOnce();
 
     const rows = await sql<{ name: string }[]>`
-      SELECT name FROM items WHERE name ILIKE ${"%" + filter + "%"}
+      SELECT name FROM items
+      WHERE name ILIKE ${"%" + filter + "%"}
     `;
 
     return new Response(JSON.stringify(rows), {
@@ -108,48 +107,49 @@ EXPOSE 80
 CMD ["bun", "server.ts"]
 ```
 
-Деплой в докку:
+Деплой в докку из папки с двумя файлами выше:
 
 ```shell
-git init fruits && cd fruits
+git init .
 git remote add dokku dokku@<ip>:fruits
 git add server.ts Dockerfile
 git commit -m "fruits api"
 git push --set-upstream dokku main
-dokku ps:restart fruits
 ```
 
-После пуша приложение читает `DATABASE_URL` от `postgres:link` и пишет в базу `petdb`.
+Проверяем: https://fruits.chenchik.me, работает!
 
 ## Настраиваем бэкап в Cloudflare R2
 
-R2 совместим с S3, поэтому подходит стандартная команда `postgres:backup-auth`. Мне нужно пять параметров: ключ, секрет, регион, сигнатура, endpoint. Для R2 они выглядят так:
+Если есть данные, их легко потерять, поэтому сразу настраиваю бэкап, чтобы сделать и забыть. У плагина есть стандартная команда `postgres:backup`, с помощью которой можно делать резервные копии в AWS S3-совместимый контейнер. У многих провайдеров есть подобные решения; у тех, в которых я зарегистрирован, — Hetzner и Cloudflare. У Hetzner, к сожалению, есть минимальная ежемесячная стоимость, а у Cloudflare R2 наоборот есть бесплатный лимит в 10 GB, которого для базы хватит с лихвой; если понадобится больше, скорее всего придется иначе конфигурировать и сервер. Для настройки бэкапа в R2 мне нужны несколько параметров: ключ, секрет и endpoint (регион и версия — только для оригинального AWS-хранилища, нас не интересует).
+
+Для авторизации на R2 нужно запустить команду:
 
 ```shell
-dokku postgres:backup-auth petdb \
+dokku postgres:backup-auth db \
   <R2_ACCESS_KEY> \
   <R2_SECRET_KEY> \
-  auto \
-  v4 \
-  https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+  us-east-1 \
+  s3v4 \
+  <R2_ENDPOINT>
 ```
 
-Дальше создаю бакет в R2 (например, `petdb-backups`) и настраиваю расписание:
+Получить эти параметры можно в [консоли Cloudflare](https://dash.cloudflare.com/), секция Build > Storage & Databases > R2 object storage. В правой части будет API Tokens -> Manage. `R2_ENDPOINT` — полноценный URL, копируйте его полностью.
+
+После этого создаю бакет в R2 (например, `db-backups`) и на сервере настраиваю расписание [0 3 * * *](https://crontab.guru#0_3_*_*_*) ежедневно в 3 утра:
 
 ```shell
-dokku postgres:backup-schedule petdb "0 3 * * *" petdb-backups/$(date +%F)
+dokku postgres:backup-schedule db "0 3 * * *" db-backups
 ```
 
 Можно вручную проверить разово:
 
 ```shell
-dokku postgres:backup petdb petdb-backups/manual-test-$(date +%s)
+dokku postgres:backup db db-backups
 ```
 
-Так сохраняется логический `pg_dump` в R2; для восстановления достаточно скачать дамп и ресторнуть его в `petdb`.
+Так сохраняется логический `pg_dump` в R2; для восстановления достаточно скачать дамп и восстановить его на сервере.
 
 ## Итоги
 
-- Один экземпляр PostgreSQL → минимум администрирования; если что-то ломается, чиню один сервис.
-- Одна база для всех → экономия ресурсов; изоляцию держу таблицами или схемами.
-- Автоматический `pg_dump` в R2 → ключевой слой защиты от дропнутых таблиц и ошибок в коде.
+Максимально простой слой хранения данных с автоматической резервной копией. 
