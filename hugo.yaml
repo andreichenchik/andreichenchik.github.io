@@ -54,16 +54,15 @@ languages:
       series: series
     menu:
       main:
-        - name: About
+        - name: Кто я
           url: about/
           weight: 5
-        - name: Archive
+        - name: Архив
           url: archives
           weight: 5
-        - name: Search
           url: search/
           weight: 10
-        - name: Tags
+        - name: Топики
           url: tags/
           weight: 10
     params:
