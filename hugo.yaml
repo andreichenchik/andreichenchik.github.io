@@ -60,6 +60,7 @@ languages:
         - name: Архив
           url: archives
           weight: 5
+        - name: Поиск
           url: search/
           weight: 10
         - name: Топики
